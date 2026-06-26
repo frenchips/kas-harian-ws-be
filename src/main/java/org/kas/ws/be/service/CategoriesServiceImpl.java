@@ -27,7 +27,6 @@ public class CategoriesServiceImpl implements CategoriesService{
         return response;
     }
 
-
     private Categories saveCategories(CategoriesRequest categoriesRequest){
 
         Categories categories = new Categories();
@@ -40,4 +39,31 @@ public class CategoriesServiceImpl implements CategoriesService{
         categoriesRepository.persist(categories);
         return categories;
     }
+
+
+    @Override
+    public CategoriesResponse updateCategories(Long id, CategoriesRequest categoriesRequest) {
+        Categories categories = updateData(id, categoriesRequest);
+
+        CategoriesResponse response = new CategoriesResponse();
+        response.setCategoriesName(categories.getCategoryName());
+        response.setType(categories.getType());
+
+        return response;
+    }
+
+
+    private Categories updateData(Long id, CategoriesRequest categoriesRequest){
+        Categories categories = categoriesRepository.findById(id);
+        if(categories != null){
+            categories.setCategoryName(categoriesRequest.getCategoriesName());
+            categories.setType(categoriesRequest.getType());
+            categories.setUpdateBy("Admin");
+            categories.setUdpateAt(new Timestamp(System.currentTimeMillis()));
+            categories.setRecordFlag("U");
+        }
+        return  categories;
+    }
+
+
 }

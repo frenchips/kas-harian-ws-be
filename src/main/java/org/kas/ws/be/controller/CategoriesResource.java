@@ -2,10 +2,7 @@ package org.kas.ws.be.controller;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.kas.ws.be.dto.request.CategoriesRequest;
@@ -29,6 +26,23 @@ public class CategoriesResource {
         WebResponse response = new WebResponse();
         response.setStatus("Success");
         response.setMessage("Succesfully create Categories");
+        response.setData(responseData);
+        // Mengembalikan HTTP 201 Created bersama dengan data response
+        return Response.status(Response.Status.CREATED)
+                .entity(response)
+                .build();
+    }
+
+
+    @PUT
+    @Path("{id}")
+    public Response update(@PathParam("id") Long id, CategoriesRequest request) {
+        // Memanggil service untuk memproses bisnis logis
+        CategoriesResponse responseData = categoriesService.updateCategories(id, request);
+
+        WebResponse response = new WebResponse();
+        response.setStatus("Success");
+        response.setMessage("Succesfully update Categories");
         response.setData(responseData);
         // Mengembalikan HTTP 201 Created bersama dengan data response
         return Response.status(Response.Status.CREATED)
