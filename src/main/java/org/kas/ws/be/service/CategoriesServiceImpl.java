@@ -4,11 +4,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.kas.ws.be.dto.request.CategoriesRequest;
+import org.kas.ws.be.dto.request.SearchCategoriesRequest;
 import org.kas.ws.be.dto.response.CategoriesResponse;
+import org.kas.ws.be.dto.response.PaginationResponse;
 import org.kas.ws.be.model.Categories;
 import org.kas.ws.be.repository.CategoriesRepository;
 
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class CategoriesServiceImpl implements CategoriesService{
@@ -22,6 +26,7 @@ public class CategoriesServiceImpl implements CategoriesService{
         Categories saveData = saveCategories(categoriesRequest);
 
         CategoriesResponse response  = new CategoriesResponse();
+        response.setId(saveData.getId());
         response.setCategoriesName(saveData.getCategoryName());
         response.setType(saveData.getType());
         return response;
@@ -46,6 +51,7 @@ public class CategoriesServiceImpl implements CategoriesService{
         Categories categories = updateData(id, categoriesRequest);
 
         CategoriesResponse response = new CategoriesResponse();
+        response.setId(categories.getId());
         response.setCategoriesName(categories.getCategoryName());
         response.setType(categories.getType());
 
@@ -65,5 +71,26 @@ public class CategoriesServiceImpl implements CategoriesService{
         return  categories;
     }
 
+    @Override
+    public PaginationResponse<CategoriesResponse> getCategoriesPaginated(SearchCategoriesRequest searchCategoriesRequest) {
+        List<Categories> categoriesList = categoriesRepository.findPaginatedNative(searchCategoriesRequest.getOffset(), searchCategoriesRequest.getSize(), searchCategoriesRequest.getSearch());
 
+        List<CategoriesResponse> responseList = categoriesList.stream()
+                .map(this::toCategoriesResponse)
+                .collect(Collectors.toList());
+
+        long totalElements = categoriesRepository.countNative();
+        int totalPages = (int) Math.ceil((double) totalElements / searchCategoriesRequest.getSize());
+        boolean isLast = (searchCategoriesRequest.getOffset() + 1) >= totalPages;
+
+        return new PaginationResponse<>(responseList, searchCategoriesRequest.getOffset(), searchCategoriesRequest.getSize(), totalElements, totalPages, isLast);
+    }
+
+    private CategoriesResponse toCategoriesResponse(Categories categories) {
+        CategoriesResponse response = new CategoriesResponse();
+        response.setId(categories.getId());
+        response.setCategoriesName(categories.getCategoryName());
+        response.setType(categories.getType());
+        return response;
+    }
 }

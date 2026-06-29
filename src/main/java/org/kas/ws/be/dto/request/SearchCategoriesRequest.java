@@ -1,4 +1,4 @@
-package org.kas.ws.be.dto.response;
+package org.kas.ws.be.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CategoriesResponse {
-    private Long id;
-    private String categoriesName;
-    private String type;
+public class SearchCategoriesRequest {
+    private String search;
+    private Integer offset;
+    private Integer size;
 }

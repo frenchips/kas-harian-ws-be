@@ -6,13 +6,16 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.kas.ws.be.dto.request.CategoriesRequest;
+import org.kas.ws.be.dto.request.SearchCategoriesRequest;
 import org.kas.ws.be.dto.response.CategoriesResponse;
+import org.kas.ws.be.dto.response.PaginationResponse;
 import org.kas.ws.be.dto.response.WebResponse;
 import org.kas.ws.be.service.CategoriesService;
 
 @Path("/categories")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+
 public class CategoriesResource {
 
     @Inject
@@ -50,5 +53,17 @@ public class CategoriesResource {
                 .build();
     }
 
+    @POST
+    @Path("/searchCategories")
+    public Response getPaginated(SearchCategoriesRequest request) {
+        PaginationResponse<CategoriesResponse> responseData = categoriesService.getCategoriesPaginated(request);
+
+        WebResponse response = new WebResponse();
+        response.setStatus("Success");
+        response.setMessage("Successfully retrieve categories");
+        response.setData(responseData);
+
+        return Response.ok(response).build();
+    }
 
 }

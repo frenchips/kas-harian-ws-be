@@ -1,5 +1,13 @@
 package org.kas.ws.be.dto.request;
 
-public class TransactionRequest {
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
+public class TransactionRequest {
+    private Long categoriesId;
+    private Integer income;
+    private Integer expend;
+    private String description;
 }

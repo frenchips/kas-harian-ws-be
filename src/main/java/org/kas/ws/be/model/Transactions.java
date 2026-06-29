@@ -21,6 +21,12 @@ public class Transactions extends BaseEntity{
     @JoinColumn(name = "category_id", referencedColumnName = "id", nullable = false)
     private Categories categoriesId;
 
+    @Column(name = "income", nullable = false)
+    private Integer income;
+
+    @Column(name = "expend", nullable = true)
+    private Integer expend;
+
     @Column(name = "amount", nullable = false)
     private Integer amount;
 
