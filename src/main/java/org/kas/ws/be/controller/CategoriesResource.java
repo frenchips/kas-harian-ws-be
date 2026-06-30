@@ -12,6 +12,8 @@ import org.kas.ws.be.dto.response.PaginationResponse;
 import org.kas.ws.be.dto.response.WebResponse;
 import org.kas.ws.be.service.CategoriesService;
 
+import java.util.List;
+
 @Path("/categories")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -45,12 +47,35 @@ public class CategoriesResource {
 
         WebResponse response = new WebResponse();
         response.setStatus("Success");
-        response.setMessage("Succesfully update Categories");
+        response.setMessage("Successfully update Categories");
         response.setData(responseData);
-        // Mengembalikan HTTP 201 Created bersama dengan data response
-        return Response.status(Response.Status.CREATED)
-                .entity(response)
-                .build();
+        // Mengembalikan HTTP 200 OK bersama dengan data response
+        return Response.ok(response).build();
+    }
+
+    @DELETE
+    @Path("{id}")
+    public Response delete(@PathParam("id") Long id) {
+        categoriesService.deleteCategories(id);
+
+        WebResponse response = new WebResponse();
+        response.setStatus("Success");
+        response.setMessage("Successfully delete Categories");
+        response.setData(null);
+
+        return Response.ok(response).build();
+    }
+
+    @GET
+    public Response getAll() {
+        List<CategoriesResponse> responseData = categoriesService.getAllCategories();
+
+        WebResponse response = new WebResponse();
+        response.setStatus("Success");
+        response.setMessage("Successfully retrieve all categories");
+        response.setData(responseData);
+
+        return Response.ok(response).build();
     }
 
     @POST

@@ -36,4 +36,22 @@ public class CategoriesRepository implements PanacheRepository<Categories> {
         Query query = entityManager.createNativeQuery(sql);
         return ((Number) query.getSingleResult()).longValue();
     }
+
+    public long countSearchNative(String search) {
+        String sql = """
+                SELECT COUNT(*) FROM mst_categories
+                WHERE ( :searchValue IS NULL OR :searchValue = '' )
+                   OR ( UPPER(category_name) LIKE UPPER('%' || :searchValue || '%') )
+                   OR ( UPPER(type) LIKE UPPER('%' || :searchValue || '%') )
+                """;
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("searchValue", search);
+        return ((Number) query.getSingleResult()).longValue();
+    }
+
+    public List<Categories> findAllNative() {
+        String sql = "SELECT * FROM mst_categories ORDER BY create_at DESC, id";
+        Query query = entityManager.createNativeQuery(sql, Categories.class);
+        return query.getResultList();
+    }
 }

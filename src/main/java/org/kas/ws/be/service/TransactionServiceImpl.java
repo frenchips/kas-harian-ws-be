@@ -4,7 +4,9 @@ package org.kas.ws.be.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.kas.ws.be.dto.request.SearchTransactionRequest;
 import org.kas.ws.be.dto.request.TransactionRequest;
+import org.kas.ws.be.dto.response.KasSummaryResponse;
 import org.kas.ws.be.dto.response.PaginationResponse;
 import org.kas.ws.be.dto.response.TransactionResponse;
 import org.kas.ws.be.model.Categories;
@@ -91,18 +93,28 @@ public class TransactionServiceImpl implements TransactionService{
     }
 
     @Override
-    public PaginationResponse<TransactionResponse> getTransactionsPaginated(int page, int size) {
-        List<Transactions> transactionsList = transactionRepository.findPaginatedNative(page, size);
+    public PaginationResponse<TransactionResponse> getTransactionsPaginated(SearchTransactionRequest searchTransactionRequest) {
+        List<Transactions> transactionsList = transactionRepository.searchPaginatedNative(
+                searchTransactionRequest.getSearch(),
+                searchTransactionRequest.getOffset(),
+                searchTransactionRequest.getSize()
+        );
 
         List<TransactionResponse> responseList = transactionsList.stream()
                 .map(this::toTransactionResponse)
                 .collect(Collectors.toList());
 
-        long totalElements = transactionRepository.countNative();
-        int totalPages = (int) Math.ceil((double) totalElements / size);
-        boolean isLast = (page + 1) >= totalPages;
+        long totalElements;
+        if (searchTransactionRequest.getSearch() == null || searchTransactionRequest.getSearch().isEmpty()) {
+            totalElements = transactionRepository.countNative();
+        } else {
+            totalElements = transactionRepository.countSearchNative(searchTransactionRequest.getSearch());
+        }
+        
+        int totalPages = (int) Math.ceil((double) totalElements / searchTransactionRequest.getSize());
+        boolean isLast = (searchTransactionRequest.getOffset() + 1) >= totalPages;
 
-        return new PaginationResponse<>(responseList, page, size, totalElements, totalPages, isLast);
+        return new PaginationResponse<>(responseList, searchTransactionRequest.getOffset(), searchTransactionRequest.getSize(), totalElements, totalPages, isLast);
     }
 
     private TransactionResponse toTransactionResponse(Transactions transactions) {
@@ -116,5 +128,14 @@ public class TransactionServiceImpl implements TransactionService{
         response.setTransactionDate(transactions.getTransactionDate());
         response.setAmount(transactions.getAmount());
         return response;
+    }
+
+    @Override
+    public KasSummaryResponse getKasSummary() {
+        Integer pemasukan = transactionRepository.getTotalPemasukan();
+        Integer pengeluaran = transactionRepository.getTotalPengeluaran();
+        Integer saldo = transactionRepository.getSaldoTerakhir();
+        
+        return new KasSummaryResponse(pemasukan, pengeluaran, saldo);
     }
 }

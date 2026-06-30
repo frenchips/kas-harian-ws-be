@@ -4,7 +4,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.kas.ws.be.dto.request.SearchTransactionRequest;
 import org.kas.ws.be.dto.request.TransactionRequest;
+import org.kas.ws.be.dto.response.KasSummaryResponse;
 import org.kas.ws.be.dto.response.PaginationResponse;
 import org.kas.ws.be.dto.response.TransactionResponse;
 import org.kas.ws.be.dto.response.WebResponse;
@@ -33,15 +35,27 @@ public class TransactionResource {
                 .build();
     }
 
-    @GET
-    public Response getPaginated(
-            @QueryParam("page") @DefaultValue("0") int page,
-            @QueryParam("size") @DefaultValue("10") int size) {
-        PaginationResponse<TransactionResponse> responseData = transactionService.getTransactionsPaginated(page, size);
+    @POST
+    @Path("/searchTransaction")
+    public Response getPaginated(SearchTransactionRequest request) {
+        PaginationResponse<TransactionResponse> responseData = transactionService.getTransactionsPaginated(request);
 
         WebResponse response = new WebResponse();
         response.setStatus("Success");
         response.setMessage("Successfully retrieve transactions");
+        response.setData(responseData);
+
+        return Response.ok(response).build();
+    }
+
+    @GET
+    @Path("/summary")
+    public Response getKasSummary() {
+        KasSummaryResponse responseData = transactionService.getKasSummary();
+
+        WebResponse response = new WebResponse();
+        response.setStatus("Success");
+        response.setMessage("Successfully retrieve kas summary");
         response.setData(responseData);
 
         return Response.ok(response).build();

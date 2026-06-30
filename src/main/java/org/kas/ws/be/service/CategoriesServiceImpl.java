@@ -47,6 +47,7 @@ public class CategoriesServiceImpl implements CategoriesService{
 
 
     @Override
+    @Transactional
     public CategoriesResponse updateCategories(Long id, CategoriesRequest categoriesRequest) {
         Categories categories = updateData(id, categoriesRequest);
 
@@ -79,7 +80,13 @@ public class CategoriesServiceImpl implements CategoriesService{
                 .map(this::toCategoriesResponse)
                 .collect(Collectors.toList());
 
-        long totalElements = categoriesRepository.countNative();
+        long totalElements;
+        if (searchCategoriesRequest.getSearch() == null || searchCategoriesRequest.getSearch().isEmpty()) {
+            totalElements = categoriesRepository.countNative();
+        } else {
+            totalElements = categoriesRepository.countSearchNative(searchCategoriesRequest.getSearch());
+        }
+        
         int totalPages = (int) Math.ceil((double) totalElements / searchCategoriesRequest.getSize());
         boolean isLast = (searchCategoriesRequest.getOffset() + 1) >= totalPages;
 
@@ -92,5 +99,23 @@ public class CategoriesServiceImpl implements CategoriesService{
         response.setCategoriesName(categories.getCategoryName());
         response.setType(categories.getType());
         return response;
+    }
+
+    @Override
+    public List<CategoriesResponse> getAllCategories() {
+        List<Categories> categoriesList = categoriesRepository.findAllNative();
+        
+        return categoriesList.stream()
+                .map(this::toCategoriesResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteCategories(Long id) {
+        Categories categories = categoriesRepository.findById(id);
+        if (categories != null) {
+            categoriesRepository.delete(categories);
+        }
     }
 }
